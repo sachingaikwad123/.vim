@@ -1,0 +1,434 @@
+"-----------------------------------------------------------------------------
+" PLUGIN: vim-addon-manager (vam)
+"-----------------------------------------------------------------------------
+"
+" INSTALLING PLUGINS:
+"
+"   Every time vim is started, it will look in the 'vam#ActivateAddons' list
+"   below and install any plugins you don't already have installed the next time
+"   you launch vim.  Plugins get installed into ~/.vim/vim-addons/.  There are
+"   thousands of available plugins.
+"
+"   Finding new plugins (<c-d> to autocomplete addon names):
+"
+"       :ActiveAddons <c-d>
+"
+"   Find the name you want and add it to the vam#ActivateAddons below to use it
+"   permanently.
+"
+" NOTE:
+"
+"   Re: pathogen
+"
+"   I'm using vim-addon-manager instead of pathogen for modules I haven't
+"   modified and don't want to check into my repository. vim-addon-manager is
+"   more feature full, requires less effort when adding new plugins, makes it
+"   easier to update my external plugins and doesn't require me to add all the
+"   plugins I want to my .vim/ git repository.
+"
+"   I am however using pathogen for my own modules.  These are things that are
+"   custom to me and haven't been released to the wider vim script world (i.e.
+"   aren't available under vam).  These are under ~/.vim/bundle/.
+"
+"   For those interested in pathogen see:
+"   http://tammersaleh.com/posts/the-modern-vim-config-with-pathogen
+"
+fun SetupVAM()
+    let vam_install_path = expand('$HOME') . '/.vim/vim-addons'
+    exec 'set runtimepath+='.vam_install_path.'/vim-addon-manager'
+
+    if !filereadable(vam_install_path.'/vim-addon-manager/.git/config') && 1 == confirm("git clone VAM into ".vam_install_path."?","&Y\n&N")
+        exec '!p='.shellescape(vam_install_path).'; mkdir -p "$p" && cd "$p" && git clone --depth 1 git://github.com/MarcWeber/vim-addon-manager.git'
+        " VAM run helptags automatically if you install or update plugins
+        exec 'helptags '.fnameescape(vam_install_path.'/vim-addon-manager/doc')
+    endif
+
+    " git shoud be in your path.
+    call vam#ActivateAddons([
+\           'fugitive',
+\           'pathogen',
+\           'powerline',
+\           'Tagbar',
+\           ],
+\       {'auto_install' : 1})
+" \           'powerline',
+" \           'Gundo',
+" \           'pathogen',
+" \           'snipmate',
+" \           'snipmate-snippets',
+" \           'Indent_Guides',
+" \           'Conque_Shell',
+" \           'Tagbar',
+" \           'vcscommand',
+" \           'clang_complete',
+" \           'cscope_macros',
+" \           'git.zip',
+" \           'a',
+" \           'surround',
+" \           'CCTree',
+" \           'YankRing',
+" \           'Align%294',
+" \           'Command-T',
+" \           'The_NERD_Commenter',
+" \           'LargeFile',
+" \           'matchit.zip',
+
+
+    " Load the modules in ~/.vim/bundle/
+    call pathogen#infect()
+endfun
+call SetupVAM()
+
+" From vimrc_example.vim:
+" Use Vim settings, rather then Vi settings much better!.
+" This must be first, because it changes other options as a side effect.
+set nocompatible
+
+" allow backspacing over everything in insert mode
+set backspace=indent,eol,start
+
+" show line numbers
+set nu
+
+set textwidth=80
+
+"if has("vms")
+"  set nobackup		" do not keep a backup file, use versions instead
+"else
+"  set backup		" keep a backup file
+"endif
+
+set history=50		" keep 50 lines of command line history
+set ruler		" show the cursor position all the time
+set showmode		" display current mode
+set showcmd		" display incomplete commands
+set laststatus=2        " Show status line at the bottom of the window.
+
+set autoindent
+
+" Jeff's cscope settings
+if has("cscope")
+	set csprg=/usr/bin/cscope
+	set csto=0
+	set cst
+	set nocsverb
+	" add any database in current directory
+	if filereadable("cscope.out")
+	    cs add cscope.out
+	" else add database pointed to by environment
+	elseif $CSCOPE_DB != ""
+	    cs add $CSCOPE_DB
+	endif
+	set csverb
+
+	" Using 'CTRL-\' then a search type makes the vim window
+	" "shell-out", with search results displayed on the bottom
+
+	nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
+	nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+	nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
+
+	" Using 'CTRL-spacebar' then a search type makes the vim window
+	" split horizontally, with search result displayed in
+	" the new window.
+
+	nmap <C-[>s :scs find s <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[>g :scs find g <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[>c :scs find c <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[>t :scs find t <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[>e :scs find e <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[>f :scs find f <C-R>=expand("<cfile>")<CR><CR>
+	nmap <C-[>i :scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+	nmap <C-[>d :scs find d <C-R>=expand("<cword>")<CR><CR>
+
+	" Hitting CTRL-space *twice* before the search type does a vertical
+	" split instead of a horizontal one
+
+	nmap <C-[><C-[>s :vert scs find s <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[><C-[>g :vert scs find g <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[><C-[>c :vert scs find c <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[><C-[>t :vert scs find t <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[><C-[>e :vert scs find e <C-R>=expand("<cword>")<CR><CR>
+	nmap <C-[><C-[>i :vert scs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+	nmap <C-[><C-[>d :vert scs find d <C-R>=expand("<cword>")<CR><CR>
+endif
+
+" Only do this part when compiled with support for autocommands.
+if has("autocmd")
+
+  " Enable file type detection.
+  " Use the default filetype settings, so that mail gets 'tw' set to 72,
+  " 'cindent' is on in C files, etc.
+  " Also load indent files, to automatically do language-dependent indenting.
+  filetype on
+  filetype plugin indent on
+
+  " Put these in an autocmd group, so that we can delete them easily.
+  augroup vimrcEx
+  au!
+
+  " For all text files set 'textwidth' to 78 characters.
+  autocmd FileType text setlocal textwidth=70
+
+  " for actual C (not C++) programming where comments have explicit end
+  " characters, if starting a new line in the middle of a comment automatically
+  " insert the comment leader characters:
+  autocmd FileType c set formatoptions+=ro
+
+  " for Perl programming, have things in braces indenting themselves:
+  autocmd FileType perl set smartindent
+
+  " When editing a file, always jump to the last known cursor position.
+  " Don't do it when the position is invalid or when inside an event handler
+  " (happens when dropping a file on gvim).
+  autocmd BufReadPost *
+    \ if line("'\"") > 0 && line("'\"") <= line("$") |
+    \   exe "normal g`\"" |
+    \ endif
+
+  augroup END
+else
+  set autoindent
+endif " has("autocmd")
+" End From vimrc_example.vim
+
+" Personal configurations:
+
+" Set quick escape from insert mode.
+imap jj <esc>
+imap Jj <esc>
+imap jJ <esc>
+imap JJ <esc>
+
+" Set quick command mode from normal mode.
+map ; :
+
+" Set quick save from command mode.
+map S ;w<enter>
+
+" Set quick visual folder browsing.
+map T ;edit ./<enter>
+
+" Indent a block of code.
+" map e ;s/^/    /<enter>
+map e ;s/^/    /
+" map E ;s/^    //<enter>
+
+" Enable the syntax highlighting on enabled terminals.
+if &t_Co > 1
+   syntax enable
+endif
+
+" Set tab settings appropriate for source code editing.
+" set tabstop=8
+set smarttab
+set shiftwidth=4
+" set expandtab
+
+" Enable incremental search.
+set incsearch
+
+" Enable fast window switching.
+map t ;wincmd 
+
+" Place the cursor in the center of the screen at all times.
+"set scrolloff=999
+
+" Force cursor to be 'near' center of the screen after scrolling down.
+"set scrolljump=15
+
+" For gvim.
+if has("gui_running")
+    " Preferred Font
+    if has("gui_gtk2")
+        set guifont=Bitstream\ Vera\ Sans\ Mono\ 16
+    elseif has("x11")
+        set guifont=-bitstream-bitstream\ vera\ sans\ mono-medium-r-normal-*-*-160-*-*-m-*-microsoft-cp1252
+    else
+        set guifont=Bitstream_Vera_Sans_Mono:h16:cDEFAULT
+    endif
+    " Preferred Location
+    winpos 50 50
+    " Preferred Size
+    set lines=45 columns=90
+    " Color Scheme
+    colors desert
+else
+    " For reverse video display.
+    set background=dark
+endif 
+
+" Buffer manipulation commands
+map H ;tabp<enter>
+map L ;tabn<enter>
+map F ;tab
+
+" Turn off annoying highlighting.
+"set nohlsearch
+
+" Turn on autosave.
+set autowrite
+
+" Turn on paren high-lighting.
+set showmatch
+
+" splitting shortcuts
+map E ;vsplit<enter>;wincmd l<enter>;n 
+map X ;split<enter>;wincmd j<enter>;n 
+
+" use console mouse
+" This used to work in putty.
+" set mouse=r
+" This is required for Mac OSX iTerm2 terminal.
+set mouse=nicr
+
+" use cursor line highlighting
+if version >= 700
+	set cursorline
+	"set cursorcolumn
+endif
+
+" map f11/12 keys to forward-back in quick-fix
+map <F11> ;cp<enter>
+map <F12> ;cn<enter>
+
+" reset the cscope connection
+"function UpdateCscope()
+"	!cscope -qRb
+"	cs restart
+"endfunction
+"command CUP call UpdateCscope()
+
+" alignment command
+map B mzgqap`z
+
+"svn-blame shortcut
+vmap bl :<C-U>!svn blame <C-R>=expand("%:p") <CR> \| sed -n <C-R>=line("'<") <CR>,<C-R>=line("'>") <CR>p <CR>
+
+" Build tags of your own project with CTRL+F12
+map <C-F8> :!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q .<CR>
+
+" OmniCppComplete
+let OmniCpp_NamespaceSearch = 1
+let OmniCpp_GlobalScopeSearch = 1
+let OmniCpp_ShowAccess = 1
+let OmniCpp_MayCompleteDot = 1
+let OmniCpp_MayCompleteArrow = 1
+let OmniCpp_MayCompleteScope = 1
+let OmniCpp_DefaultNamespaces = ["std", "_GLIBCXX_STD"]
+" automatically open and close the popup menu / preview window
+au CursorMovedI,InsertLeave * if pumvisible() == 0|silent! pclose|endif
+set completeopt=menuone,menu,longest,preview
+
+" Autocompletion Shortcuts
+" Close preview window automatically
+" autocmd CursorMovedI * if pumvisible() == 0|pclose|endif
+" autocmd InsertLeave * if pumvisible() == 0|pclose|endif
+
+runtime ftplugin/man.vim
+
+" Doxygen comments
+let g:DoxygenToolkit_authorName="Sachin Gaikwad (sgaikwad@riverbed.com)"
+let g:DoxygenToolkit_commentType="C"
+let g:DoxygenToolkit_briefTag_pre="@Brief  "
+let g:DoxygenToolkit_paramTag_pre="@Param "
+let g:DoxygenToolkit_returnTag="@Returns   "
+let g:DoxygenToolkit_briefTag_funcName = "yes"
+let g:DoxygenToolkit_blockHeader="*"
+let g:DoxygenToolkit_blockFooter="*"
+let g:DoxygenToolkit_versionString="1.0"
+
+" Doxygen Shortcuts
+map da ;DoxAuthor<enter>
+map df ;Dox<enter>
+
+" Switch betweeen source and header file fast
+map <F4> :e %:p:s,.h$,.X123X,:s,.cc$,.h,:s,.X123X$,.cc,<CR>
+
+set tags+=~/.vim/tags/cpp
+
+" Ugly mapping: Need to convert to function
+map <F12> :!find -iname '*.c' -o -iname '*.cc' -o -iname '*.cpp' -o -iname '*.h' > cscope.files<enter>:!cscope -b -i cscope.files -f cscope.out<enter>:!ctags -R --c++-kinds=+p --fields=+iaS --extra=+q -L cscope.files<enter>
+
+" tab autocomplettion of filenames in VIM
+set wildmode=longest:full
+set wildmenu
+
+" Comment selected lines
+map <F8> :s/^/\/\//<enter>	
+" UnComment selected lines
+map <F7> :s/\/\///<enter>
+
+" Comment selected lines for python like scripts
+map <F6> :s/^/#/<enter>	
+" UnComment selected lines for python like scripts
+map <F5> :s/^#//<enter>
+
+" This is to make function arguments to be indent nicely with previous line's
+" function arguments
+" void foobar (int data,
+"              char *name,
+"              int integer)
+" We are now using google.vim styling and following is not applicable with it
+" set cino=(0
+
+syntax on
+autocmd BufRead,BufNewFile *.cohesity set ft=cohesity
+autocmd BufRead,BufNewFile *.log set ft=cohesity
+autocmd BufRead,BufNewFile *.out set ft=cohesity
+
+" Cohesity specific vim buffer shortcuts
+" source cohesity.vim
+
+" clang_complete settings
+let g:clang_library_path = '/home/sachin/workspace/toolchain/x86_64-linux/llvm-3.6.1/lib'
+
+" TagBar keyboard shortcut
+nmap <F8> :TagbarToggle<CR>
+
+" ex command for toggling hex mode - define mapping if desired
+command Hexmode call ToggleHex()
+nmap H :Hexmode<CR>
+
+" helper function to toggle hex mode
+function ToggleHex()
+  " hex mode should be considered a read-only operation
+  " save values for modified and read-only for restoration later,
+  " and clear the read-only flag for now
+  let l:modified=&mod
+  let l:oldreadonly=&readonly
+  let &readonly=0
+  let l:oldmodifiable=&modifiable
+  let &modifiable=1
+  if !exists("b:editHex") || !b:editHex
+    " save old options
+    let b:oldft=&ft
+    let b:oldbin=&bin
+    " set new options
+    setlocal binary " make sure it overrides any textwidth, etc.
+    let &ft="xxd"
+    " set status
+    let b:editHex=1
+    " switch to hex editor
+    %!xxd
+  else
+    " restore old options
+    let &ft=b:oldft
+    if !b:oldbin
+      setlocal nobinary
+    endif
+    " set status
+    let b:editHex=0
+    " return to normal editing
+    %!xxd -r
+  endif
+  " restore values for modified and read only state
+  let &mod=l:modified
+  let &readonly=l:oldreadonly
+  let &modifiable=l:oldmodifiable
+endfunction
